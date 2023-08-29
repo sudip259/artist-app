@@ -1,11 +1,12 @@
 import React, { ReactNode, useState } from "react";
-import { Layout, Menu } from "antd";
+import { Layout, Menu, Space } from "antd";
 import { Link, useLocation } from "react-router-dom";
 import {
   HomeOutlined,
   UserOutlined,
   UsergroupAddOutlined,
   PlayCircleOutlined,
+  PoweroffOutlined,
 } from "@ant-design/icons";
 
 const { Sider, Content, Header } = Layout;
@@ -82,7 +83,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           }}
         >
           <h2 style={{ margin: 0 }}>Artist Management System</h2>
-          <Link to="/login">Logout</Link>
+          <Link to="/login">
+            <Space>
+              <PoweroffOutlined />
+              <span>Logout</span>
+            </Space>
+          </Link>
         </Header>
         <Content
           style={{
