@@ -22,49 +22,54 @@ const User: React.FC = () => {
 
   interface DataType {
     key: string;
-    name: string;
-    age: number;
+    first_name: string;
+    email: string;
+    last_name: string;
+    role_type: string;
+    phone: string;
+    gender: string;
     address: string;
-    tags: string[];
+    dob: string;
   }
 
   const columns: ColumnsType<DataType> = [
     {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
+      title: "First Name",
+      dataIndex: "first_name",
+      key: "first_name",
       render: (text) => <a>{text}</a>,
     },
     {
-      title: "Age",
-      dataIndex: "age",
-      key: "age",
+      title: "Last Name",
+      dataIndex: "last_name",
+      key: "last_name",
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+    },
+    {
+      title: "Role",
+      dataIndex: "role_type",
+      key: "role_type",
+    },
+    {
+      title: "Phone",
+      dataIndex: "phone",
+      key: "phone",
+    },
+    {
+      title: "Gender",
+      dataIndex: "gender",
+      key: "gender",
     },
     {
       title: "Address",
       dataIndex: "address",
       key: "address",
     },
-    {
-      title: "Tags",
-      key: "tags",
-      dataIndex: "tags",
-      render: (_, { tags }) => (
-        <>
-          {tags.map((tag) => {
-            let color = tag.length > 5 ? "geekblue" : "green";
-            if (tag === "loser") {
-              color = "volcano";
-            }
-            return (
-              <Tag color={color} key={tag}>
-                {tag.toUpperCase()}
-              </Tag>
-            );
-          })}
-        </>
-      ),
-    },
+
     {
       title: "Action",
       key: "action",
@@ -76,6 +81,7 @@ const User: React.FC = () => {
           />
 
           <DeleteFilled
+            onClick={() => setDeleteModalVisible(true)}
             style={{ color: "red", fontSize: "18px", cursor: "pointer" }}
           />
         </Space>
@@ -86,28 +92,37 @@ const User: React.FC = () => {
   const data: DataType[] = [
     {
       key: "1",
-      name: "John Brown",
-      age: 32,
-      address: "New York No. 1 Lake Park",
-      tags: ["nice", "developer"],
+      first_name: "admin",
+      email: "artists@gmail.com",
+      last_name: "admin",
+      role_type: "artist",
+      phone: "1234560000000009898",
+      gender: "m",
+      address: "123 Main hello bro sindhupalchowk12",
+      dob: "1990-01-01T00:00:00Z",
     },
     {
       key: "2",
-      name: "Jim Green",
-      age: 42,
-      address: "London No. 1 Lake Park",
-      tags: ["loser"],
-    },
-    {
-      key: "3",
-      name: "Joe Black",
-      age: 32,
-      address: "Sydney No. 1 Lake Park",
-      tags: ["cool", "teacher"],
+      first_name: "admin",
+      email: "artists@gmail.com",
+      last_name: "admin",
+      role_type: "artist",
+      phone: "1234560000000009898",
+      gender: "m",
+      address: "123 Main hello bro sindhupalchowk12",
+      dob: "1990-01-01T00:00:00Z",
     },
   ];
 
   const [open, setOpen] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+
+  const onCancel = () => {
+    setDeleteModalVisible(false);
+  };
+  const onConfirm = () => {
+    setDeleteModalVisible(false);
+  };
 
   return (
     <div>
@@ -139,7 +154,7 @@ const User: React.FC = () => {
               size="large"
               icon={<PlusCircleOutlined />}
             >
-              Add User
+              Add new user
             </Button>
           </div>
           <Divider />
@@ -156,7 +171,11 @@ const User: React.FC = () => {
       </>
 
       <UserAddUpdate open={open} setOpen={setOpen} />
-      <DeleteConfirmationModal visible={true} />
+      <DeleteConfirmationModal
+        visible={deleteModalVisible}
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+      />
     </div>
   );
 };

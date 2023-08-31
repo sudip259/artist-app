@@ -58,7 +58,7 @@ const Login: React.FC = () => {
           </p>
           <Form name="login" onFinish={onFinish}>
             <Form.Item
-              name="username"
+              name="email"
               rules={[
                 { required: true, message: "Please enter your username" },
               ]}

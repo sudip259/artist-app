@@ -12,13 +12,13 @@ import {
 
 const { Option } = Select;
 
-const AddUpdateUser = ({ open, setOpen }: any) => {
+const AddUpdateArtist = ({ open, setOpen }: any) => {
   const [form] = Form.useForm();
 
   return (
     <>
       <Drawer
-        title="Create a new user"
+        title="Create a new artist"
         width={720}
         onClose={() => setOpen(false)}
         open={open}
@@ -48,49 +48,28 @@ const AddUpdateUser = ({ open, setOpen }: any) => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="first_name"
-                label="First Name"
-                rules={[{ required: true, message: "Please enter first name" }]}
+                name="user_id"
+                label="User"
+                rules={[{ required: true, message: "Please choose user" }]}
               >
-                <Input placeholder="Please enter first name" />
+                <Select placeholder="Please choose user" showSearch allowClear>
+                  <Option value="m">Male</Option>
+                  <Option value="f">Female</Option>
+                  <Option value="o">Other</Option>
+                </Select>{" "}
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
-                name="last_name"
-                label="Last Name"
-                rules={[{ required: true, message: "Please enter last name" }]}
+                name="name"
+                label="Name"
+                rules={[{ required: true, message: "Please enter name" }]}
               >
-                <Input placeholder="Please enter last name" />
+                <Input placeholder="Please enter name" />
               </Form.Item>
             </Col>
           </Row>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="email"
-                label="Email"
-                rules={[
-                  {
-                    required: true,
-                    type: "email",
-                    message: "Please enter an email",
-                  },
-                ]}
-              >
-                <Input placeholder="Please enter an email" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label="Password"
-                name="password"
-                rules={[{ required: true, message: "Please enter password!" }]}
-              >
-                <Input.Password placeholder="Please Enter password" />
-              </Form.Item>
-            </Col>
-          </Row>
+
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
@@ -127,20 +106,6 @@ const AddUpdateUser = ({ open, setOpen }: any) => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="phone"
-                label="Phone"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter phone",
-                  },
-                ]}
-              >
-                <Input placeholder="Please enter phone" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
                 name="address"
                 label="Address"
                 rules={[
@@ -153,19 +118,34 @@ const AddUpdateUser = ({ open, setOpen }: any) => {
                 <Input placeholder="Please enter address" />
               </Form.Item>
             </Col>
+            <Col span={12}>
+              <Form.Item
+                name="first_release_year"
+                label="First Release Year"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please enter first release year",
+                  },
+                ]}
+              >
+                <Input placeholder="Please enter first release year" />
+              </Form.Item>
+            </Col>
           </Row>
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="role_type"
-                label="Role"
-                rules={[{ required: true, message: "Please choose role" }]}
+                name="number_of_albums_released"
+                label="Number Of Album Released"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please enter number of album released",
+                  },
+                ]}
               >
-                <Select placeholder="Please choose role" showSearch allowClear>
-                  <Option value="super_admin">Super Admin</Option>
-                  <Option value="artist">Artist</Option>
-                  <Option value="artist_manager">Artist Manager</Option>
-                </Select>
+                <Input placeholder="Please enter number of album released" />
               </Form.Item>
             </Col>
           </Row>
@@ -175,4 +155,4 @@ const AddUpdateUser = ({ open, setOpen }: any) => {
   );
 };
 
-export default AddUpdateUser;
+export default AddUpdateArtist;

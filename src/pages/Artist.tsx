@@ -6,38 +6,53 @@ import {
   DeleteFilled,
   EditFilled,
   PlusCircleOutlined,
+  ImportOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
 import TableView from "../components/Table";
 import { useState } from "react";
-import UserAddUpdate from "../components/UserAddUpdate";
+import DeleteConfirmationModal from "../components/DeleteConfirmModal";
+import ArtistAddUpdate from "../components/ArtistAddUpdate";
 
-const User: React.FC = () => {
+const Artist: React.FC = () => {
   const breadcrumbItems = [
     <Breadcrumb.Item key="dashboard">
       <Link to="/dashboard">Dashboard</Link>
     </Breadcrumb.Item>,
-    <Breadcrumb.Item key="user">User</Breadcrumb.Item>,
+    <Breadcrumb.Item key="artist">Artist</Breadcrumb.Item>,
   ];
 
   interface DataType {
-    key: string;
+    user: string;
     name: string;
-    age: number;
+    dob: string;
+    gender: string;
     address: string;
-    tags: string[];
+    first_release_year: string;
+    number_of_albums_released: string;
   }
 
   const columns: ColumnsType<DataType> = [
     {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
+      title: "User",
+      dataIndex: "user",
+      key: "user",
       render: (text) => <a>{text}</a>,
     },
     {
-      title: "Age",
-      dataIndex: "age",
-      key: "age",
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Dob",
+      dataIndex: "dob",
+      key: "dob",
+    },
+    {
+      title: "Gender",
+      key: "gender",
+      dataIndex: "gender",
     },
     {
       title: "Address",
@@ -45,24 +60,14 @@ const User: React.FC = () => {
       key: "address",
     },
     {
-      title: "Tags",
-      key: "tags",
-      dataIndex: "tags",
-      render: (_, { tags }) => (
-        <>
-          {tags.map((tag) => {
-            let color = tag.length > 5 ? "geekblue" : "green";
-            if (tag === "loser") {
-              color = "volcano";
-            }
-            return (
-              <Tag color={color} key={tag}>
-                {tag.toUpperCase()}
-              </Tag>
-            );
-          })}
-        </>
-      ),
+      title: "First Release Year",
+      dataIndex: "first_release_year",
+      key: "first_release_year",
+    },
+    {
+      title: "Number Of Album Released",
+      key: "number_of_albums_released",
+      dataIndex: "number_of_albums_released",
     },
     {
       title: "Action",
@@ -75,6 +80,7 @@ const User: React.FC = () => {
           />
 
           <DeleteFilled
+            onClick={() => setDeleteModalVisible(true)}
             style={{ color: "red", fontSize: "18px", cursor: "pointer" }}
           />
         </Space>
@@ -84,29 +90,34 @@ const User: React.FC = () => {
 
   const data: DataType[] = [
     {
-      key: "1",
-      name: "John Brown",
-      age: 32,
-      address: "New York No. 1 Lake Park",
-      tags: ["nice", "developer"],
+      user: "string",
+      name: "string",
+      dob: "number",
+      gender: "string",
+      address: "string",
+      first_release_year: "string",
+      number_of_albums_released: "string",
     },
     {
-      key: "2",
-      name: "Jim Green",
-      age: 42,
-      address: "London No. 1 Lake Park",
-      tags: ["loser"],
-    },
-    {
-      key: "3",
-      name: "Joe Black",
-      age: 32,
-      address: "Sydney No. 1 Lake Park",
-      tags: ["cool", "teacher"],
+      user: "string",
+      name: "string",
+      dob: "number",
+      gender: "string",
+      address: "string",
+      first_release_year: "string",
+      number_of_albums_released: "string",
     },
   ];
 
   const [open, setOpen] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+
+  const onCancel = () => {
+    setDeleteModalVisible(false);
+  };
+  const onConfirm = () => {
+    setDeleteModalVisible(false);
+  };
 
   return (
     <div>
@@ -126,7 +137,29 @@ const User: React.FC = () => {
           {/* Your homepage content goes here */}
           <div>
             <h2>Welcome to the Artist Management System</h2>
-            <p>This is where you can manage and organize users.</p>
+            <p>This is where you can manage and organize artists.</p>
+            <Space>
+              <Button
+                onClick={() => {
+                  // setOpen(true);
+                }}
+                type="primary"
+                size="large"
+                icon={<ImportOutlined />}
+              >
+                Import
+              </Button>
+              <Button
+                onClick={() => {
+                  // setOpen(true);
+                }}
+                type="primary"
+                size="large"
+                icon={<DownloadOutlined />}
+              >
+                Export
+              </Button>
+            </Space>
           </div>
           <div>
             {" "}
@@ -138,7 +171,7 @@ const User: React.FC = () => {
               size="large"
               icon={<PlusCircleOutlined />}
             >
-              Add User
+              Add new artist
             </Button>
           </div>
           <Divider />
@@ -154,9 +187,14 @@ const User: React.FC = () => {
         </div>
       </>
 
-      <UserAddUpdate open={open} setOpen={setOpen} />
+      <ArtistAddUpdate open={open} setOpen={setOpen} />
+      <DeleteConfirmationModal
+        visible={deleteModalVisible}
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+      />
     </div>
   );
 };
 
-export default User;
+export default Artist;

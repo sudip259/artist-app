@@ -9,59 +9,50 @@ import {
 } from "@ant-design/icons";
 import TableView from "../components/Table";
 import { useState } from "react";
-import UserAddUpdate from "../components/UserAddUpdate";
+import DeleteConfirmationModal from "../components/DeleteConfirmModal";
+import MusicAddUpdate from "../components/MusicAddUpdate";
 
-const User: React.FC = () => {
+const Music: React.FC = () => {
   const breadcrumbItems = [
     <Breadcrumb.Item key="dashboard">
       <Link to="/dashboard">Dashboard</Link>
     </Breadcrumb.Item>,
-    <Breadcrumb.Item key="user">User</Breadcrumb.Item>,
+    <Breadcrumb.Item key="music">Music</Breadcrumb.Item>,
   ];
 
   interface DataType {
     key: string;
-    name: string;
-    age: number;
-    address: string;
-    tags: string[];
+    artist_name: string;
+    title: string;
+    album_name: string;
+    genre: string;
   }
 
   const columns: ColumnsType<DataType> = [
     {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
+      title: "Artist",
+      dataIndex: "artist_name",
+      key: "artist",
       render: (text) => <a>{text}</a>,
     },
     {
-      title: "Age",
-      dataIndex: "age",
-      key: "age",
+      title: "Title",
+      dataIndex: "title",
+      key: "title",
     },
     {
-      title: "Address",
-      dataIndex: "address",
-      key: "address",
+      title: "Album Name",
+      dataIndex: "album_name",
+      key: "album_name",
     },
     {
-      title: "Tags",
-      key: "tags",
-      dataIndex: "tags",
-      render: (_, { tags }) => (
-        <>
-          {tags.map((tag) => {
-            let color = tag.length > 5 ? "geekblue" : "green";
-            if (tag === "loser") {
-              color = "volcano";
-            }
-            return (
-              <Tag color={color} key={tag}>
-                {tag.toUpperCase()}
-              </Tag>
-            );
-          })}
-        </>
+      title: "Genre",
+      key: "genre",
+      dataIndex: "genre",
+      render: (text) => (
+        <Tag color={"blue"} key={text}>
+          {text.toUpperCase()}
+        </Tag>
       ),
     },
     {
@@ -75,6 +66,7 @@ const User: React.FC = () => {
           />
 
           <DeleteFilled
+            onClick={() => setDeleteModalVisible(true)}
             style={{ color: "red", fontSize: "18px", cursor: "pointer" }}
           />
         </Space>
@@ -85,28 +77,29 @@ const User: React.FC = () => {
   const data: DataType[] = [
     {
       key: "1",
-      name: "John Brown",
-      age: 32,
-      address: "New York No. 1 Lake Park",
-      tags: ["nice", "developer"],
+      artist_name: "John Brown",
+      title: "Title",
+      genre: "Rock",
+      album_name: "Album",
     },
     {
       key: "2",
-      name: "Jim Green",
-      age: 42,
-      address: "London No. 1 Lake Park",
-      tags: ["loser"],
-    },
-    {
-      key: "3",
-      name: "Joe Black",
-      age: 32,
-      address: "Sydney No. 1 Lake Park",
-      tags: ["cool", "teacher"],
+      artist_name: "John Brown1",
+      title: "Title1",
+      genre: "Jazz",
+      album_name: "Album1",
     },
   ];
 
   const [open, setOpen] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+
+  const onCancel = () => {
+    setDeleteModalVisible(false);
+  };
+  const onConfirm = () => {
+    setDeleteModalVisible(false);
+  };
 
   return (
     <div>
@@ -126,7 +119,7 @@ const User: React.FC = () => {
           {/* Your homepage content goes here */}
           <div>
             <h2>Welcome to the Artist Management System</h2>
-            <p>This is where you can manage and organize users.</p>
+            <p>This is where you can manage and organize music.</p>
           </div>
           <div>
             {" "}
@@ -138,7 +131,7 @@ const User: React.FC = () => {
               size="large"
               icon={<PlusCircleOutlined />}
             >
-              Add User
+              Add new music
             </Button>
           </div>
           <Divider />
@@ -154,9 +147,14 @@ const User: React.FC = () => {
         </div>
       </>
 
-      <UserAddUpdate open={open} setOpen={setOpen} />
+      <MusicAddUpdate open={open} setOpen={setOpen} />
+      <DeleteConfirmationModal
+        visible={deleteModalVisible}
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+      />
     </div>
   );
 };
 
-export default User;
+export default Music;
