@@ -1,6 +1,6 @@
 import React, { ReactNode, useState } from "react";
 import { Layout, Menu, Space } from "antd";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   HomeOutlined,
   UserOutlined,
@@ -46,6 +46,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       link: "/dashboard/music",
     },
   ];
+  const navigate = useNavigate();
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider width={200} theme="dark">
@@ -83,12 +84,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           }}
         >
           <h2 style={{ margin: 0 }}>Artist Management System</h2>
-          <Link to="/login">
-            <Space>
-              <PoweroffOutlined />
-              <span>Logout</span>
-            </Space>
-          </Link>
+
+          <Space
+            style={{ cursor: "pointer", color: "blue" }}
+            onClick={() => {
+              localStorage.removeItem("authToken");
+              navigate("/login");
+            }}
+          >
+            <PoweroffOutlined />
+            <span>Logout</span>
+          </Space>
         </Header>
         <Content
           style={{

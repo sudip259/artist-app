@@ -1,15 +1,27 @@
 import React from "react";
-import { Layout, Form, Input, Button } from "antd";
+import { Layout, Form, Input, Button, message } from "antd";
 import { LockOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { BASE_URL } from "../constant";
 
 const { Content } = Layout;
 
 const Login: React.FC = () => {
+  const login = async (credentials: { username: string; password: string }) => {
+    return await axios.post(`${BASE_URL}/login`, credentials);
+  };
+
   const navigate = useNavigate();
   const onFinish = (values: any) => {
-    navigate("/dashboard");
-    console.log("Received values:", values);
+    login(values)
+      .then((res) => {
+        localStorage.setItem("authToken", "Token " + res?.data?.token);
+        navigate("/dashboard");
+      })
+      .catch((error) => {
+        message.error(error.message);
+      });
   };
 
   return (
