@@ -1,4 +1,4 @@
-import { Breadcrumb, Button, Divider, Space, Tag } from "antd";
+import { Breadcrumb, Button, Divider, Form, message, Space, Tag } from "antd";
 import { Link } from "react-router-dom";
 import BreadCrumb from "../components/BreadCrumb";
 import type { ColumnsType } from "antd/es/table";
@@ -8,11 +8,15 @@ import {
   PlusCircleOutlined,
 } from "@ant-design/icons";
 import TableView from "../components/Table";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DeleteConfirmationModal from "../components/DeleteConfirmModal";
 import MusicAddUpdate from "../components/MusicAddUpdate";
+import { BASE_URL } from "../constant";
+import axios from "axios";
 
 const Music: React.FC = () => {
+  const [form] = Form.useForm();
+  const [id, setId] = useState<any>("");
   const breadcrumbItems = [
     <Breadcrumb.Item key="dashboard">
       <Link to="/dashboard">Dashboard</Link>
@@ -58,36 +62,43 @@ const Music: React.FC = () => {
     {
       title: "Action",
       key: "action",
-      render: (_, record) => (
+      render: (_, record: any) => (
         <Space size="large">
           <EditFilled
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              setAction("edit");
+              setId(record?.music_id);
+              console.log("genre", record?.genre);
+              form.setFieldsValue({
+                title: record?.title,
+                artist_id: record?.artist?.artist_id,
+                album_name: record?.album_name,
+                genre: record?.genre,
+                // genre:
+                //   record?.genre === "R&B"
+                //     ? "rnb"
+                //     : record?.genre === "Country"
+                //     ? "country"
+                //     : record?.genre === "Classic"
+                //     ? "classic"
+                //     : record?.genre === "Rock"
+                //     ? "rock"
+                //     : "jazz",
+              });
+              setOpen(true);
+            }}
             style={{ color: "blue", fontSize: "18px", cursor: "pointer" }}
           />
 
           <DeleteFilled
-            onClick={() => setDeleteModalVisible(true)}
+            onClick={() => {
+              setDeleteModalVisible(true);
+              setId(record?.music_id);
+            }}
             style={{ color: "red", fontSize: "18px", cursor: "pointer" }}
           />
         </Space>
       ),
-    },
-  ];
-
-  const data: DataType[] = [
-    {
-      key: "1",
-      artist_name: "John Brown",
-      title: "Title",
-      genre: "Rock",
-      album_name: "Album",
-    },
-    {
-      key: "2",
-      artist_name: "John Brown1",
-      title: "Title1",
-      genre: "Jazz",
-      album_name: "Album1",
     },
   ];
 
@@ -97,9 +108,98 @@ const Music: React.FC = () => {
   const onCancel = () => {
     setDeleteModalVisible(false);
   };
+  const deleteMusic = async (id: string | number) => {
+    const getConfig = {
+      url: `${BASE_URL}/delete-music/${id}`, // Replace with your API endpoint URL
+      method: "delete",
+      headers: {
+        Authorization: `${localStorage.getItem("authToken")}`, // Replace with your authentication token
+        "Content-Type": "application/json",
+      },
+    };
+    return await axios(getConfig);
+  };
   const onConfirm = () => {
+    deleteMusic(id)
+      .then((res) => {
+        setRefresh(Math.random());
+        message.success("Music deleted successfully");
+      })
+      .catch((err) => {
+        message.error("Something went wrong");
+      });
     setDeleteModalVisible(false);
   };
+
+  const getMusic = async () => {
+    const getConfig = {
+      url: `${BASE_URL}/music/list`, // Replace with your API endpoint URL
+      method: "get",
+      headers: {
+        Authorization: `${localStorage.getItem("authToken")}`, // Replace with your authentication token
+        "Content-Type": "application/json",
+      },
+    };
+    return await axios(getConfig);
+  };
+
+  const [music, setMusic] = useState([]);
+  const [action, setAction] = useState("add");
+  const [refresh, setRefresh] = useState(Math.random());
+  const [artists, setArtists] = useState([]);
+  const getArtist = async () => {
+    const getConfig = {
+      url: `${BASE_URL}/artist/list`, // Replace with your API endpoint URL
+      method: "get",
+      headers: {
+        Authorization: `${localStorage.getItem("authToken")}`, // Replace with your authentication token
+        "Content-Type": "application/json",
+      },
+    };
+    return await axios(getConfig);
+  };
+  useEffect(() => {
+    getArtist()
+      .then((res: any) => {
+        const sortedData: any = [...res?.data].sort((a, b) => {
+          // Parse the date strings into Date objects
+          const dateA: any = new Date(a.created_at);
+          const dateB: any = new Date(b.created_at);
+
+          // Compare the Date objects for sorting
+          return dateB - dateA;
+        });
+        setArtists(sortedData);
+      })
+      .catch((err) => {
+        setArtists([]);
+      });
+  }, [refresh]);
+  useEffect(() => {
+    getMusic()
+      .then((res: any) => {
+        const sortedData: any = [...res?.data].sort((a, b) => {
+          // Parse the date strings into Date objects
+          const dateA: any = new Date(a.created_at);
+          const dateB: any = new Date(b.created_at);
+
+          // Compare the Date objects for sorting
+          return dateB - dateA;
+        });
+        const newMusic = sortedData?.map((data: any) => {
+          return {
+            ...data,
+            artist_id: data?.artist?.artist_id,
+            artist_name: data?.artist?.artist_name,
+          };
+        });
+        setMusic(newMusic);
+      })
+      .catch((err) => {
+        setMusic([]);
+      });
+  }, [refresh]);
+  console.log("music", music);
 
   return (
     <div>
@@ -125,6 +225,9 @@ const Music: React.FC = () => {
             {" "}
             <Button
               onClick={() => {
+                form.resetFields();
+                setId("");
+                setAction("add");
                 setOpen(true);
               }}
               type="primary"
@@ -143,11 +246,19 @@ const Music: React.FC = () => {
             borderRadius: "5px",
           }}
         >
-          <TableView columns={columns} data={data} />
+          <TableView columns={columns} data={music} />
         </div>
       </>
 
-      <MusicAddUpdate open={open} setOpen={setOpen} />
+      <MusicAddUpdate
+        open={open}
+        setOpen={setOpen}
+        artists={artists}
+        action={action}
+        setRefresh={setRefresh}
+        form={form}
+        id={id}
+      />
       <DeleteConfirmationModal
         visible={deleteModalVisible}
         onCancel={onCancel}

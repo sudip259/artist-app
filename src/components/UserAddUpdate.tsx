@@ -5,15 +5,49 @@ import {
   Drawer,
   Form,
   Input,
+  message,
   Row,
   Select,
   Space,
 } from "antd";
+import axios from "axios";
+
+import { BASE_URL } from "../constant";
 
 const { Option } = Select;
 
-const AddUpdateUser = ({ open, setOpen }: any) => {
-  const [form] = Form.useForm();
+const AddUpdateUser = ({
+  open,
+  setOpen,
+  setRefresh,
+  form,
+  action,
+  id,
+}: any) => {
+  const userCreate = async (values: any) => {
+    const postConfig = {
+      url: `${BASE_URL}/user/create`, // Replace with your API endpoint URL
+      method: "post",
+      headers: {
+        Authorization: `${localStorage.getItem("authToken")}`, // Replace with your authentication token
+        "Content-Type": "application/json",
+      },
+      data: values,
+    };
+    return await axios(postConfig);
+  };
+  const userEdit = async (values: any) => {
+    const editConfig = {
+      url: `${BASE_URL}/update-user/${id}`, // Replace with your API endpoint URL
+      method: "patch",
+      headers: {
+        Authorization: `${localStorage.getItem("authToken")}`, // Replace with your authentication token
+        "Content-Type": "application/json",
+      },
+      data: values,
+    };
+    return await axios(editConfig);
+  };
 
   return (
     <>
@@ -30,10 +64,38 @@ const AddUpdateUser = ({ open, setOpen }: any) => {
               onClick={() => {
                 form
                   .validateFields()
-                  .then((values) => {
-                    console.log("Form values:", values);
+                  .then((values: any) => {
+                    if (action === "add") {
+                      userCreate(values)
+                        .then((response) => {
+                          message.success("User created successfully");
+                          form.resetFields();
+                          setOpen(false);
+                          setRefresh(Math.random());
+                        })
+                        .catch((error) => {
+                          message.error(
+                            error?.response?.data?.message ||
+                              "Semething went wrong"
+                          );
+                        });
+                    } else {
+                      userEdit(values)
+                        .then((response: any) => {
+                          message.success("User edited successfully");
+                          form.resetFields();
+                          setOpen(false);
+                          setRefresh(Math.random());
+                        })
+                        .catch((error: any) => {
+                          message.error(
+                            error?.response?.data?.message ||
+                              "Semething went wrong"
+                          );
+                        });
+                    }
                   })
-                  .catch((error) => {
+                  .catch((error: any) => {
                     console.error("Validation failed:", error);
                   });
               }}
@@ -65,32 +127,37 @@ const AddUpdateUser = ({ open, setOpen }: any) => {
               </Form.Item>
             </Col>
           </Row>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="email"
-                label="Email"
-                rules={[
-                  {
-                    required: true,
-                    type: "email",
-                    message: "Please enter an email",
-                  },
-                ]}
-              >
-                <Input placeholder="Please enter an email" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label="Password"
-                name="password"
-                rules={[{ required: true, message: "Please enter password!" }]}
-              >
-                <Input.Password placeholder="Please Enter password" />
-              </Form.Item>
-            </Col>
-          </Row>
+          {action === "add" && (
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item
+                  name="email"
+                  label="Email"
+                  rules={[
+                    {
+                      required: true,
+                      type: "email",
+                      message: "Please enter an email",
+                    },
+                  ]}
+                >
+                  <Input placeholder="Please enter an email" />
+                </Form.Item>
+              </Col>
+
+              <Col span={12}>
+                <Form.Item
+                  label="Password"
+                  name="password"
+                  rules={[
+                    { required: true, message: "Please enter password!" },
+                  ]}
+                >
+                  <Input.Password placeholder="Please Enter password" />
+                </Form.Item>
+              </Col>
+            </Row>
+          )}
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
@@ -106,7 +173,7 @@ const AddUpdateUser = ({ open, setOpen }: any) => {
                   <Option value="m">Male</Option>
                   <Option value="f">Female</Option>
                   <Option value="o">Other</Option>
-                </Select>{" "}
+                </Select>
               </Form.Item>
             </Col>
             <Col span={12}>

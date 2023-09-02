@@ -1,4 +1,4 @@
-import { Breadcrumb, Button, Divider, Space, Tag } from "antd";
+import { Breadcrumb, Button, Divider, Form, message, Space, Tag } from "antd";
 import { Link } from "react-router-dom";
 import BreadCrumb from "../components/BreadCrumb";
 import type { ColumnsType } from "antd/es/table";
@@ -10,11 +10,17 @@ import {
   DownloadOutlined,
 } from "@ant-design/icons";
 import TableView from "../components/Table";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DeleteConfirmationModal from "../components/DeleteConfirmModal";
 import ArtistAddUpdate from "../components/ArtistAddUpdate";
+import axios from "axios";
+import { BASE_URL } from "../constant";
+import moment from "moment";
 
 const Artist: React.FC = () => {
+  const [form] = Form.useForm();
+  const [id, setId] = useState<any>("");
+  const [action, setAction] = useState("add");
   const breadcrumbItems = [
     <Breadcrumb.Item key="dashboard">
       <Link to="/dashboard">Dashboard</Link>
@@ -41,8 +47,8 @@ const Artist: React.FC = () => {
     },
     {
       title: "Name",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "artist_name",
+      key: "artist_name",
     },
     {
       title: "Dob",
@@ -72,15 +78,38 @@ const Artist: React.FC = () => {
     {
       title: "Action",
       key: "action",
-      render: (_, record) => (
+      render: (_, record: any) => (
         <Space size="large">
           <EditFilled
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              setAction("edit");
+              setId(record?.artist_id);
+
+              form.setFieldsValue({
+                name: record?.artist_name,
+                phone: record?.phone,
+                gender:
+                  record?.gender === "Male"
+                    ? "m"
+                    : record?.gener === "Female"
+                    ? "f"
+                    : "o",
+                first_release_year: record?.first_release_year,
+                address: record?.address,
+                dob: record?.dob && moment(record?.dob),
+                user_id: record?.user_id,
+                number_of_albums_released: record?.number_of_albums_released,
+              });
+              setOpen(true);
+            }}
             style={{ color: "blue", fontSize: "18px", cursor: "pointer" }}
           />
 
           <DeleteFilled
-            onClick={() => setDeleteModalVisible(true)}
+            onClick={() => {
+              setDeleteModalVisible(true);
+              setId(record?.artist_id);
+            }}
             style={{ color: "red", fontSize: "18px", cursor: "pointer" }}
           />
         </Space>
@@ -88,26 +117,52 @@ const Artist: React.FC = () => {
     },
   ];
 
-  const data: DataType[] = [
-    {
-      user: "string",
-      name: "string",
-      dob: "number",
-      gender: "string",
-      address: "string",
-      first_release_year: "string",
-      number_of_albums_released: "string",
-    },
-    {
-      user: "string",
-      name: "string",
-      dob: "number",
-      gender: "string",
-      address: "string",
-      first_release_year: "string",
-      number_of_albums_released: "string",
-    },
-  ];
+  const [refresh, setRefresh] = useState(Math.random());
+  const [artists, setArtists] = useState([]);
+  const getArtist = async () => {
+    const getConfig = {
+      url: `${BASE_URL}/artist/list`, // Replace with your API endpoint URL
+      method: "get",
+      headers: {
+        Authorization: `${localStorage.getItem("authToken")}`, // Replace with your authentication token
+        "Content-Type": "application/json",
+      },
+    };
+    return await axios(getConfig);
+  };
+  useEffect(() => {
+    getArtist()
+      .then((res: any) => {
+        const sortedData: any = [...res?.data].sort((a, b) => {
+          // Parse the date strings into Date objects
+          const dateA: any = new Date(a.created_at);
+          const dateB: any = new Date(b.created_at);
+
+          // Compare the Date objects for sorting
+          return dateB - dateA;
+        });
+
+        const newArtists = sortedData?.map((data: any) => {
+          return {
+            ...data,
+            user: data?.user?.first_name,
+            user_id: data?.user?.id,
+            dob: data?.dob?.slice(0, 10),
+            gender:
+              data?.gender === "m"
+                ? "Male"
+                : data?.gender === "f"
+                ? "Female"
+                : "Other",
+          };
+        });
+
+        setArtists(newArtists);
+      })
+      .catch((err) => {
+        setArtists([]);
+      });
+  }, [refresh]);
 
   const [open, setOpen] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -115,9 +170,58 @@ const Artist: React.FC = () => {
   const onCancel = () => {
     setDeleteModalVisible(false);
   };
+  const deleteArtist = async (id: string | number) => {
+    const getConfig = {
+      url: `${BASE_URL}/delete-artist/${id}`, // Replace with your API endpoint URL
+      method: "delete",
+      headers: {
+        Authorization: `${localStorage.getItem("authToken")}`, // Replace with your authentication token
+        "Content-Type": "application/json",
+      },
+    };
+    return await axios(getConfig);
+  };
   const onConfirm = () => {
+    deleteArtist(id)
+      .then((res: any) => {
+        setRefresh(Math.random());
+        message.success("Artist deleted successfully");
+      })
+      .catch((err: any) => {
+        message.error("Something went wrong");
+      });
     setDeleteModalVisible(false);
   };
+
+  const getUsers = async () => {
+    const getConfig = {
+      url: `${BASE_URL}/user/list`, // Replace with your API endpoint URL
+      method: "get",
+      headers: {
+        Authorization: `${localStorage.getItem("authToken")}`, // Replace with your authentication token
+        "Content-Type": "application/json",
+      },
+    };
+    return await axios(getConfig);
+  };
+  const [users, setUsers] = useState([]);
+  useEffect(() => {
+    getUsers()
+      .then((res: any) => {
+        const sortedData: any = [...res?.data].sort((a, b) => {
+          // Parse the date strings into Date objects
+          const dateA: any = new Date(a.created_at);
+          const dateB: any = new Date(b.created_at);
+
+          // Compare the Date objects for sorting
+          return dateB - dateA;
+        });
+        setUsers(sortedData);
+      })
+      .catch((err) => {
+        setUsers([]);
+      });
+  }, []);
 
   return (
     <div>
@@ -165,6 +269,9 @@ const Artist: React.FC = () => {
             {" "}
             <Button
               onClick={() => {
+                form.resetFields();
+                setId("");
+                setAction("add");
                 setOpen(true);
               }}
               type="primary"
@@ -183,11 +290,19 @@ const Artist: React.FC = () => {
             borderRadius: "5px",
           }}
         >
-          <TableView columns={columns} data={data} />
+          <TableView columns={columns} data={artists} />
         </div>
       </>
 
-      <ArtistAddUpdate open={open} setOpen={setOpen} />
+      <ArtistAddUpdate
+        open={open}
+        id={id}
+        setOpen={setOpen}
+        users={users}
+        form={form}
+        setRefresh={setRefresh}
+        action={action}
+      />
       <DeleteConfirmationModal
         visible={deleteModalVisible}
         onCancel={onCancel}

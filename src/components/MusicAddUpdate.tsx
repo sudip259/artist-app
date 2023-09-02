@@ -5,15 +5,49 @@ import {
   Drawer,
   Form,
   Input,
+  message,
   Row,
   Select,
   Space,
 } from "antd";
+import axios from "axios";
+import { BASE_URL } from "../constant";
 
 const { Option } = Select;
 
-const AddUpdateUser = ({ open, setOpen }: any) => {
-  const [form] = Form.useForm();
+const AddUpdateMusic = ({
+  open,
+  setOpen,
+  id,
+  action,
+  setRefresh,
+  artists,
+  form,
+}: any) => {
+  const musicCreate = async (values: any) => {
+    const postConfig = {
+      url: `${BASE_URL}/music/create`, // Replace with your API endpoint URL
+      method: "post",
+      headers: {
+        Authorization: `${localStorage.getItem("authToken")}`, // Replace with your authentication token
+        "Content-Type": "application/json",
+      },
+      data: values,
+    };
+    return await axios(postConfig);
+  };
+  const musicEdit = async (values: any) => {
+    const editConfig = {
+      url: `${BASE_URL}/update-music/${id}`, // Replace with your API endpoint URL
+      method: "patch",
+      headers: {
+        Authorization: `${localStorage.getItem("authToken")}`, // Replace with your authentication token
+        "Content-Type": "application/json",
+      },
+      data: values,
+    };
+    return await axios(editConfig);
+  };
 
   return (
     <>
@@ -30,10 +64,38 @@ const AddUpdateUser = ({ open, setOpen }: any) => {
               onClick={() => {
                 form
                   .validateFields()
-                  .then((values) => {
-                    console.log("Form values:", values);
+                  .then((values: any) => {
+                    if (action === "add") {
+                      musicCreate(values)
+                        .then((response) => {
+                          message.success("Music created successfully");
+                          form.resetFields();
+                          setOpen(false);
+                          setRefresh(Math.random());
+                        })
+                        .catch((error) => {
+                          message.error(
+                            error?.response?.data?.message ||
+                              "Semething went wrong"
+                          );
+                        });
+                    } else {
+                      musicEdit(values)
+                        .then((response: any) => {
+                          message.success("Music edited successfully");
+                          form.resetFields();
+                          setOpen(false);
+                          setRefresh(Math.random());
+                        })
+                        .catch((error: any) => {
+                          message.error(
+                            error?.response?.data?.message ||
+                              "Semething went wrong"
+                          );
+                        });
+                    }
                   })
-                  .catch((error) => {
+                  .catch((error: any) => {
                     console.error("Validation failed:", error);
                   });
               }}
@@ -50,17 +112,17 @@ const AddUpdateUser = ({ open, setOpen }: any) => {
               <Form.Item
                 name="artist_id"
                 label="Artist"
-                rules={[{ required: true, message: "Please choose artist" }]}
+                rules={[{ required: true, message: "Please choose gender" }]}
               >
-                <Select
-                  placeholder="Please choose artist"
-                  showSearch
-                  allowClear
-                >
-                  <Option value="m">Artist1</Option>
-                  <Option value="f">Artist2</Option>
-                  <Option value="o">Artist3</Option>
-                </Select>{" "}
+                <Select placeholder="Please choose user" showSearch allowClear>
+                  {artists?.map((artist: any) => {
+                    return (
+                      <Option value={artist?.artist_id}>
+                        {artist?.artist_name}
+                      </Option>
+                    );
+                  })}
+                </Select>
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -109,4 +171,4 @@ const AddUpdateUser = ({ open, setOpen }: any) => {
   );
 };
 
-export default AddUpdateUser;
+export default AddUpdateMusic;

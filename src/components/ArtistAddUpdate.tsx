@@ -5,15 +5,49 @@ import {
   Drawer,
   Form,
   Input,
+  message,
   Row,
   Select,
   Space,
 } from "antd";
+import axios from "axios";
+import { BASE_URL } from "../constant";
 
 const { Option } = Select;
 
-const AddUpdateArtist = ({ open, setOpen }: any) => {
-  const [form] = Form.useForm();
+const AddUpdateArtist = ({
+  open,
+  setOpen,
+  users,
+  form,
+  setRefresh,
+  id,
+  action,
+}: any) => {
+  const artistCreate = async (values: any) => {
+    const apiConfig = {
+      url: `${BASE_URL}/artist/create`, // Replace with your API endpoint URL
+      method: "post",
+      headers: {
+        Authorization: `${localStorage.getItem("authToken")}`, // Replace with your authentication token
+        "Content-Type": "application/json",
+      },
+      data: values,
+    };
+    return await axios(apiConfig);
+  };
+  const artistEdit = async (values: any) => {
+    const editConfig = {
+      url: `${BASE_URL}/update-artist/${id}`, // Replace with your API endpoint URL
+      method: "patch",
+      headers: {
+        Authorization: `${localStorage.getItem("authToken")}`, // Replace with your authentication token
+        "Content-Type": "application/json",
+      },
+      data: values,
+    };
+    return await axios(editConfig);
+  };
 
   return (
     <>
@@ -30,10 +64,36 @@ const AddUpdateArtist = ({ open, setOpen }: any) => {
               onClick={() => {
                 form
                   .validateFields()
-                  .then((values) => {
-                    console.log("Form values:", values);
+                  .then((values: any) => {
+                    action === "add"
+                      ? artistCreate(values)
+                          .then((response) => {
+                            message.success("Artist created successfully");
+                            setOpen(false);
+                            form.resetFields();
+                            setRefresh(Math.random());
+                          })
+                          .catch((error) => {
+                            message.error(
+                              error?.response?.data?.message ||
+                                "Somethig went wrong"
+                            );
+                          })
+                      : artistEdit(values)
+                          .then((res) => {
+                            message.success("Artist edited successfully");
+                            setOpen(false);
+                            form.resetFields();
+                            setRefresh(Math.random());
+                          })
+                          .catch((error) => {
+                            message.error(
+                              error?.response?.data?.message ||
+                                "Somethig went wrong"
+                            );
+                          });
                   })
-                  .catch((error) => {
+                  .catch((error: any) => {
                     console.error("Validation failed:", error);
                   });
               }}
@@ -50,13 +110,13 @@ const AddUpdateArtist = ({ open, setOpen }: any) => {
               <Form.Item
                 name="user_id"
                 label="User"
-                rules={[{ required: true, message: "Please choose user" }]}
+                rules={[{ required: true, message: "Please choose gender" }]}
               >
                 <Select placeholder="Please choose user" showSearch allowClear>
-                  <Option value="m">Male</Option>
-                  <Option value="f">Female</Option>
-                  <Option value="o">Other</Option>
-                </Select>{" "}
+                  {users?.map((user: any) => {
+                    return <Option value={user.id}>{user?.first_name}</Option>;
+                  })}
+                </Select>
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -85,7 +145,7 @@ const AddUpdateArtist = ({ open, setOpen }: any) => {
                   <Option value="m">Male</Option>
                   <Option value="f">Female</Option>
                   <Option value="o">Other</Option>
-                </Select>{" "}
+                </Select>
               </Form.Item>
             </Col>
             <Col span={12}>

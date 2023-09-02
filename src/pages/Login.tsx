@@ -17,6 +17,7 @@ const Login: React.FC = () => {
     login(values)
       .then((res) => {
         localStorage.setItem("authToken", "Token " + res?.data?.token);
+        localStorage.setItem("users", JSON.stringify(res?.data));
         navigate("/dashboard");
       })
       .catch((error) => {
@@ -40,6 +41,7 @@ const Login: React.FC = () => {
           justifyContent: "center",
           alignItems: "center",
           height: "100%",
+          width: "22%",
         }}
       >
         <Content
