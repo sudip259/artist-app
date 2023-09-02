@@ -15,7 +15,7 @@ import DeleteConfirmationModal from "../components/DeleteConfirmModal";
 import ArtistAddUpdate from "../components/ArtistAddUpdate";
 import axios from "axios";
 import { BASE_URL } from "../constant";
-import moment from "moment";
+import dayjs from "dayjs";
 
 const Artist: React.FC = () => {
   const [form] = Form.useForm();
@@ -27,6 +27,14 @@ const Artist: React.FC = () => {
     </Breadcrumb.Item>,
     <Breadcrumb.Item key="artist">Artist</Breadcrumb.Item>,
   ];
+
+  const [user, setUser] = useState<any>({});
+  useEffect(() => {
+    // Fetch user data from localStorage or an API
+    const users: any = localStorage.getItem("users");
+    const parsedUsers = JSON.parse(users);
+    setUser(parsedUsers);
+  }, [localStorage.getItem("users")]);
 
   interface DataType {
     user: string;
@@ -81,6 +89,7 @@ const Artist: React.FC = () => {
       render: (_, record: any) => (
         <Space size="large">
           <EditFilled
+            className={user?.role === "artist_manager" ? "" : "disabledIcon"}
             onClick={() => {
               setAction("edit");
               setId(record?.artist_id);
@@ -96,7 +105,7 @@ const Artist: React.FC = () => {
                     : "o",
                 first_release_year: record?.first_release_year,
                 address: record?.address,
-                dob: record?.dob && moment(record?.dob),
+                dob: record?.dob && dayjs(record?.dob),
                 user_id: record?.user_id,
                 number_of_albums_released: record?.number_of_albums_released,
               });
@@ -106,6 +115,7 @@ const Artist: React.FC = () => {
           />
 
           <DeleteFilled
+            className={user?.role === "artist_manager" ? "" : "disabledIcon"}
             onClick={() => {
               setDeleteModalVisible(true);
               setId(record?.artist_id);
@@ -266,8 +276,8 @@ const Artist: React.FC = () => {
             </Space>
           </div>
           <div>
-            {" "}
             <Button
+              disabled={user?.role === "artist_manager" ? false : true}
               onClick={() => {
                 form.resetFields();
                 setId("");

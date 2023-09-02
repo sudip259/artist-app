@@ -11,10 +11,14 @@ import {
   Space,
 } from "antd";
 import axios from "axios";
-
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import { BASE_URL } from "../constant";
+import { phoneNumberValidator } from "../utils/validator";
 
 const { Option } = Select;
+
+dayjs.extend(utc);
 
 const AddUpdateUser = ({
   open,
@@ -185,8 +189,12 @@ const AddUpdateUser = ({
                 ]}
               >
                 <DatePicker
+                  onChange={(value, dateString) => {
+                    const date = dayjs.utc(dateString);
+                    form.setFieldsValue({ dob: date });
+                  }}
                   style={{ width: "100%" }}
-                  getPopupContainer={(trigger) => trigger.parentElement!}
+                  format="YYYY-MM-DD"
                 />
               </Form.Item>
             </Col>
@@ -198,8 +206,9 @@ const AddUpdateUser = ({
                 label="Phone"
                 rules={[
                   {
+                    validator: (rule: any, value: any) =>
+                      phoneNumberValidator(rule, value, "phone number"),
                     required: true,
-                    message: "Please enter phone",
                   },
                 ]}
               >

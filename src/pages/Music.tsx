@@ -65,6 +65,7 @@ const Music: React.FC = () => {
       render: (_, record: any) => (
         <Space size="large">
           <EditFilled
+            className={user?.role === "artist" ? "" : "disabledIcon"}
             onClick={() => {
               setAction("edit");
               setId(record?.music_id);
@@ -91,6 +92,7 @@ const Music: React.FC = () => {
           />
 
           <DeleteFilled
+            className={user?.role === "artist" ? "" : "disabledIcon"}
             onClick={() => {
               setDeleteModalVisible(true);
               setId(record?.music_id);
@@ -199,7 +201,13 @@ const Music: React.FC = () => {
         setMusic([]);
       });
   }, [refresh]);
-  console.log("music", music);
+  const [user, setUser] = useState<any>({});
+  useEffect(() => {
+    // Fetch user data from localStorage or an API
+    const users: any = localStorage.getItem("users");
+    const parsedUsers = JSON.parse(users);
+    setUser(parsedUsers);
+  }, [localStorage.getItem("users")]);
 
   return (
     <div>
@@ -224,6 +232,7 @@ const Music: React.FC = () => {
           <div>
             {" "}
             <Button
+              disabled={user?.role === "artist" ? false : true}
               onClick={() => {
                 form.resetFields();
                 setId("");

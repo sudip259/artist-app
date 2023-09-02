@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { Layout, Menu, Space } from "antd";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -26,26 +26,41 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       icon: <HomeOutlined />,
       label: "Home",
       link: "/dashboard",
+      role: ["artist", "artist_manager", "super_admin"],
     },
     {
       key: "user",
       icon: <UserOutlined />,
       label: "User",
       link: "/dashboard/user",
+      role: ["super_admin", "artist_manager"],
     },
     {
       key: "artist",
       icon: <UsergroupAddOutlined />,
       label: "Artist",
       link: "/dashboard/artist",
+      role: ["artist_manager", "artist", "super_admin"],
     },
     {
       key: "music",
       icon: <PlayCircleOutlined />,
       label: "Music",
       link: "/dashboard/music",
+      role: ["artist", "artist_manager", "super_admin"],
     },
   ];
+  const [user, setUser] = useState<any>({});
+  useEffect(() => {
+    // Fetch user data from localStorage or an API
+    const users: any = localStorage.getItem("users");
+    const parsedUsers = JSON.parse(users);
+    setUser(parsedUsers);
+  }, [localStorage.getItem("users")]);
+
+  const allowedMenuItems: any = menuItems.filter((menu: any) =>
+    menu?.role.includes(user?.role)
+  );
   const navigate = useNavigate();
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -65,7 +80,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           </div>
         </div>
         <Menu theme="dark" mode="inline" selectedKeys={[lastPathSegment]}>
-          {menuItems.map((item) => (
+          {allowedMenuItems?.map((item: any) => (
             <Menu.Item key={item.key} icon={item.icon}>
               <Link to={item.link}>{item.label}</Link>
             </Menu.Item>
@@ -89,6 +104,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             style={{ cursor: "pointer", color: "blue" }}
             onClick={() => {
               localStorage.removeItem("authToken");
+              localStorage.removeItem("users");
               navigate("/login");
             }}
           >

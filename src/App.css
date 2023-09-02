@@ -36,3 +36,10 @@
     transform: rotate(360deg);
   }
 }
+/* styles.module.css */
+.disabledIcon {
+  color: #ccc !important;
+  pointer-events: none;
+  opacity: 0.5; /* Reduce opacity to indicate it's disabled */
+  /* Add any other styles you want here */
+}

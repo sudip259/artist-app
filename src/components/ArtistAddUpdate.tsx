@@ -11,7 +11,13 @@ import {
   Space,
 } from "antd";
 import axios from "axios";
+import dayjs from "dayjs";
+
 import { BASE_URL } from "../constant";
+import utc from "dayjs/plugin/utc";
+import { numberValidator, yearValidator } from "../utils/validator";
+
+dayjs.extend(utc);
 
 const { Option } = Select;
 
@@ -76,7 +82,7 @@ const AddUpdateArtist = ({
                           .catch((error) => {
                             message.error(
                               error?.response?.data?.message ||
-                                "Somethig went wrong"
+                                "Something went wrong"
                             );
                           })
                       : artistEdit(values)
@@ -89,7 +95,7 @@ const AddUpdateArtist = ({
                           .catch((error) => {
                             message.error(
                               error?.response?.data?.message ||
-                                "Somethig went wrong"
+                                "Something went wrong"
                             );
                           });
                   })
@@ -157,8 +163,12 @@ const AddUpdateArtist = ({
                 ]}
               >
                 <DatePicker
+                  onChange={(value, dateString) => {
+                    const date = dayjs.utc(dateString);
+                    form.setFieldsValue({ dob: date });
+                  }}
                   style={{ width: "100%" }}
-                  getPopupContainer={(trigger) => trigger.parentElement!}
+                  format="YYYY-MM-DD"
                 />
               </Form.Item>
             </Col>
@@ -184,8 +194,9 @@ const AddUpdateArtist = ({
                 label="First Release Year"
                 rules={[
                   {
+                    validator: (rule: any, value: any) =>
+                      yearValidator(rule, value, "release year"),
                     required: true,
-                    message: "Please enter first release year",
                   },
                 ]}
               >
@@ -200,8 +211,9 @@ const AddUpdateArtist = ({
                 label="Number Of Album Released"
                 rules={[
                   {
+                    validator: (rule: any, value: any) =>
+                      numberValidator(rule, value, "number of albums"),
                     required: true,
-                    message: "Please enter number of album released",
                   },
                 ]}
               >

@@ -13,7 +13,7 @@ import UserAddUpdate from "../components/UserAddUpdate";
 import DeleteConfirmationModal from "../components/DeleteConfirmModal";
 import { BASE_URL } from "../constant";
 import axios from "axios";
-import moment from "moment";
+import dayjs from "dayjs";
 
 const User: React.FC = () => {
   const [form] = Form.useForm();
@@ -55,6 +55,13 @@ const User: React.FC = () => {
       key: "email",
     },
     {
+      title: "Dob",
+      dataIndex: "dob",
+      key: "dob",
+      render: (text) => <>{text?.slice(0, 10)}</>,
+    },
+
+    {
       title: "Role",
       dataIndex: "role_type",
       key: "role_type",
@@ -84,6 +91,7 @@ const User: React.FC = () => {
       render: (_, record: any) => (
         <Space size="large">
           <EditFilled
+            className={user?.role === "super_admin" ? "" : "disabledIcon"}
             onClick={() => {
               setAction("edit");
               setId(record?.id);
@@ -95,7 +103,7 @@ const User: React.FC = () => {
                 gender: record?.gender,
                 role_type: record?.role_type,
                 address: record?.address,
-                dob: record?.dob && moment(record?.dob),
+                dob: record?.dob && dayjs(record?.dob),
               });
               setOpen(true);
             }}
@@ -103,6 +111,7 @@ const User: React.FC = () => {
           />
 
           <DeleteFilled
+            className={user?.role === "super_admin" ? "" : "disabledIcon"}
             onClick={() => {
               setDeleteModalVisible(true);
               setId(record?.id);
@@ -176,6 +185,14 @@ const User: React.FC = () => {
       });
   }, [refresh]);
 
+  const [user, setUser] = useState<any>({});
+  useEffect(() => {
+    // Fetch user data from localStorage or an API
+    const users: any = localStorage.getItem("users");
+    const parsedUsers = JSON.parse(users);
+    setUser(parsedUsers);
+  }, [localStorage.getItem("users")]);
+
   return (
     <div>
       <>
@@ -199,6 +216,7 @@ const User: React.FC = () => {
           <div>
             {" "}
             <Button
+              disabled={user?.role !== "super_admin"}
               onClick={() => {
                 form.resetFields();
                 setId("");
