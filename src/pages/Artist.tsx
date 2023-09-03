@@ -16,11 +16,28 @@ import ArtistAddUpdate from "../components/ArtistAddUpdate";
 import axios from "axios";
 import { BASE_URL } from "../constant";
 import dayjs from "dayjs";
+import CsvFileUpload from "../components/CsvUpload";
 
 const Artist: React.FC = () => {
   const [form] = Form.useForm();
   const [id, setId] = useState<any>("");
   const [action, setAction] = useState("add");
+
+  const handleExportCSV = async () => {
+    try {
+      const exportConfig = {
+        url: `${BASE_URL}/artist/export-csv`,
+        method: "get",
+        headers: {
+          Authorization: `${localStorage.getItem("authToken")}`,
+          "Content-Type": "application/json",
+        },
+      };
+      return await axios(exportConfig);
+    } catch (error) {
+      console.error("Error exporting CSV:", error);
+    }
+  };
   const breadcrumbItems = [
     <Breadcrumb.Item key="dashboard">
       <Link to="/dashboard">Dashboard</Link>
@@ -253,19 +270,26 @@ const Artist: React.FC = () => {
             <h2>Welcome to the Artist Management System</h2>
             <p>This is where you can manage and organize artists.</p>
             <Space>
+              <CsvFileUpload setRefresh={setRefresh} role={user?.role} />
               <Button
+                disabled={user?.role === "artist_manager" ? false : true}
                 onClick={() => {
-                  // setOpen(true);
-                }}
-                type="primary"
-                size="large"
-                icon={<ImportOutlined />}
-              >
-                Import
-              </Button>
-              <Button
-                onClick={() => {
-                  // setOpen(true);
+                  handleExportCSV()
+                    .then((res: any) => {
+                      console.log("res", res);
+                      const blob = new Blob([res?.data], { type: "text/csv" });
+                      const url = URL.createObjectURL(blob);
+                      const link = document.createElement("a");
+                      link.href = url;
+                      link.download = "artists.csv";
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      URL.revokeObjectURL(url);
+                    })
+                    .catch((error) => {
+                      message.error("Error downloading artists");
+                    });
                 }}
                 type="primary"
                 size="large"
